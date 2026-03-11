@@ -1,0 +1,7 @@
+
+{
+"name":"cluster-manager",
+"version":"0.1.0",
+"scripts":{"dev":"node index.js"}
+}
+

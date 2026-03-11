@@ -1,9 +1,0 @@
-{
- "name": "nextjs-app",
- "framework": "Next.js",
- "features": [
-  "react",
-  "routing",
-  "api routes"
- ]
-}

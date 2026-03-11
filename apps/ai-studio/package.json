@@ -1,0 +1,18 @@
+{
+  "name": "oix-ai-studio",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "16.1.6",
+    "oix-core": "file:../../packages/oix-core",
+    "openai": "^4.47.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "reactflow": "^11.11.4",
+    "zustand": "^4.5.2"
+  }
+}

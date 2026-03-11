@@ -1,9 +1,0 @@
-{
- "name": "rest-api",
- "description": "Standard REST API template",
- "features": [
-  "routing",
-  "controllers",
-  "database"
- ]
-}

@@ -1,0 +1,1 @@
+export default function Navbar(){return(<nav><a href="/">OIX</a><a href="/dashboard">Dashboard</a><a href="/agents">Agents</a><a href="/workflows">Workflows</a><a href="/marketplace">Marketplace</a></nav>)}

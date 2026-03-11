@@ -1,9 +1,0 @@
-{
- "name": "basic-agent",
- "description": "Basic AI agent template",
- "features": [
-  "memory",
-  "task execution",
-  "API access"
- ]
-}

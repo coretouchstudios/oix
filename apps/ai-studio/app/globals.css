@@ -1,0 +1,27 @@
+html,body{
+margin:0;
+padding:0;
+background:#020617;
+color:white;
+font-family:system-ui,sans-serif;
+}
+
+button{
+background:#1e293b;
+color:white;
+border:none;
+padding:6px 10px;
+border-radius:6px;
+cursor:pointer;
+margin-right:6px;
+}
+
+textarea{
+width:100%;
+margin-top:6px;
+background:#0f172a;
+color:white;
+border:1px solid #334155;
+border-radius:6px;
+padding:6px;
+}

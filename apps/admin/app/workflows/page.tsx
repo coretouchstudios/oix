@@ -1,0 +1,15 @@
+export default function Workflows(){
+
+  return(
+
+    <div>
+
+      <h1>Workflows</h1>
+
+      <p>Monitor workflow executions.</p>
+
+    </div>
+
+  )
+
+}
