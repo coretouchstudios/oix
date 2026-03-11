@@ -11,5 +11,7 @@ export async function POST(req: Request) {
     emit: (log: any) => logs.push(log)
   })
 
-  return Response.json({ logs })
+  return Response.json({
+    logs
+  })
 }
