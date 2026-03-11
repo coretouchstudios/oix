@@ -1,0 +1,10 @@
+{
+ "name": "ai-startup",
+ "description": "AI startup blueprint",
+ "components": [
+  "web-app",
+  "api",
+  "database",
+  "ai-engine"
+ ]
+}

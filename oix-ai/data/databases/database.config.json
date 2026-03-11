@@ -1,0 +1,6 @@
+{
+ "database": "oix",
+ "provider": "postgres",
+ "host": "localhost",
+ "port": 5432
+}

@@ -1,0 +1,9 @@
+{
+ "name": "microservice",
+ "description": "Microservice architecture template",
+ "features": [
+  "docker",
+  "api",
+  "logging"
+ ]
+}

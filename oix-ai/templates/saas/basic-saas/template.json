@@ -1,0 +1,9 @@
+{
+ "name": "basic-saas",
+ "description": "Basic SaaS starter template",
+ "features": [
+  "authentication",
+  "billing",
+  "dashboard"
+ ]
+}

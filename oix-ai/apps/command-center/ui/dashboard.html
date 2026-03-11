@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>OIX Command Center</title>
+
+<style>
+
+body{
+ font-family:Arial;
+ background:#0a0f1f;
+ color:white;
+ text-align:center;
+}
+
+.card{
+ background:#151b2f;
+ padding:20px;
+ margin:20px;
+ border-radius:10px;
+ display:inline-block;
+ width:200px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🌍 OIX Command Center</h1>
+
+<div id="dashboard"></div>
+
+<script>
+
+async function load(){
+
+ const res = await fetch("http://localhost:15000/command/dashboard")
+
+ const data = await res.json()
+
+ const d = data.system.dashboard
+
+ document.getElementById("dashboard").innerHTML = `
+
+ <div class="card">
+ <h2>Ventures</h2>
+ <p>${d.activeVentures}</p>
+ </div>
+
+ <div class="card">
+ <h2>Nodes Online</h2>
+ <p>${d.nodesOnline}</p>
+ </div>
+
+ <div class="card">
+ <h2>Startups Generating</h2>
+ <p>${d.startupsGenerating}</p>
+ </div>
+
+ <div class="card">
+ <h2>Total Revenue</h2>
+ <p>$${d.totalRevenue}</p>
+ </div>
+
+ `
+
+}
+
+load()
+
+</script>
+
+</body>
+
+</html>

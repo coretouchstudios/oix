@@ -1,0 +1,204 @@
+Write-Host "🎨 Designing OIX AI OS Dashboard..."
+
+$css=@"
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root{
+--bg:#070b14;
+--panel:#0f1629;
+--panel2:#131c34;
+--accent:#4f7cff;
+--accent2:#00d4ff;
+--text:#e6edff;
+}
+
+*{
+box-sizing:border-box;
+font-family:Inter,system-ui;
+}
+
+body{
+margin:0;
+background:linear-gradient(135deg,#070b14,#0b1224 60%);
+color:var(--text);
+}
+
+.layout{
+display:flex;
+height:100vh;
+}
+
+.sidebar{
+width:240px;
+background:linear-gradient(180deg,#0f1629,#070b14);
+border-right:1px solid rgba(255,255,255,.05);
+padding:25px;
+display:flex;
+flex-direction:column;
+gap:14px;
+}
+
+.sidebar a{
+text-decoration:none;
+color:#a9b7ff;
+padding:10px 14px;
+border-radius:8px;
+transition:.25s;
+display:block;
+}
+
+.sidebar a:hover{
+background:linear-gradient(90deg,var(--accent),var(--accent2));
+color:white;
+}
+
+main{
+flex:1;
+padding:35px;
+overflow:auto;
+}
+
+.card{
+background:linear-gradient(145deg,#0f1629,#131c34);
+border-radius:14px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:
+0 6px 25px rgba(0,0,0,.6),
+inset 0 1px rgba(255,255,255,.03);
+border:1px solid rgba(255,255,255,.05);
+transition:.3s;
+}
+
+.card:hover{
+transform:translateY(-4px);
+box-shadow:
+0 12px 40px rgba(0,0,0,.7),
+0 0 25px rgba(79,124,255,.25);
+}
+
+.navbar{
+height:60px;
+display:flex;
+align-items:center;
+padding:0 25px;
+background:linear-gradient(90deg,#0f1629,#131c34);
+border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.logo{
+font-weight:600;
+font-size:18px;
+background:linear-gradient(90deg,var(--accent),var(--accent2));
+-webkit-background-clip:text;
+color:transparent;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:20px;
+}
+
+.metric{
+font-size:28px;
+font-weight:600;
+margin-top:8px;
+}
+
+.button{
+background:linear-gradient(90deg,var(--accent),var(--accent2));
+border:none;
+padding:10px 16px;
+border-radius:8px;
+color:white;
+cursor:pointer;
+}
+
+.button:hover{
+opacity:.9;
+}
+"@
+
+Set-Content styles/global.css $css
+
+$navbar=@"
+export default function Navbar(){
+return(
+<div className='navbar'>
+<div className='logo'>OIX AI OS</div>
+</div>
+)
+}
+"@
+
+Set-Content components/layout/Navbar.tsx $navbar
+
+$sidebar=@"
+"use client"
+import Link from 'next/link'
+
+export default function Sidebar(){
+return(
+<div className='sidebar'>
+
+<b style={{marginBottom:'10px'}}>Navigation</b>
+
+<Link href="/">Dashboard</Link>
+<Link href="/agents">Agents</Link>
+<Link href="/workflows">Workflows</Link>
+<Link href="/memory">Memory</Link>
+<Link href="/logs">Logs</Link>
+<Link href="/terminal">Terminal</Link>
+<Link href="/analytics">Analytics</Link>
+
+</div>
+)
+}
+"@
+
+Set-Content components/layout/Sidebar.tsx $sidebar
+
+$home=@"
+export default function Page(){
+return(
+
+<div>
+
+<h1 style={{marginBottom:'25px'}}>OIX Control Center</h1>
+
+<div className='grid'>
+
+<div className='card'>
+Agents Running
+<div className='metric'>4</div>
+</div>
+
+<div className='card'>
+Active Workflows
+<div className='metric'>2</div>
+</div>
+
+<div className='card'>
+Vector Memories
+<div className='metric'>152</div>
+</div>
+
+<div className='card'>
+System Events
+<div className='metric'>1284</div>
+</div>
+
+</div>
+
+</div>
+
+)
+}
+"@
+
+Set-Content app/page.tsx $home
+
+Write-Host "✅ OIX Dashboard Redesigned Successfully"
+Write-Host "Restart with: npm run dev"
+
