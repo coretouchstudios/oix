@@ -1,18 +1,15 @@
 {
-  "name": "oix-ai-studio",
+  "name": "ai-studio",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
-    "next": "16.1.6",
-    "oix-core": "file:../../packages/oix-core",
-    "openai": "^4.47.1",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "reactflow": "^11.11.4",
-    "zustand": "^4.5.2"
+    "next": "14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "axios": "^1.7.2"
   }
 }

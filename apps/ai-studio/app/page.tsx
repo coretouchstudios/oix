@@ -1,17 +1,44 @@
 "use client"
 
-import WorkflowEditor from "../components/WorkflowEditor"
+import { useState } from "react"
+import axios from "axios"
 
-export default function Page(){
+export default function Home(){
 
-return(
+  const [prompt,setPrompt] = useState("")
+  const [response,setResponse] = useState("")
 
-<div style={{width:"100vw",height:"100vh"}}>
+  async function runAgent(){
 
-<WorkflowEditor/>
+    const res = await axios.post(
+      process.env.NEXT_PUBLIC_API_URL + "/agents/run",
+      { task: prompt }
+    )
 
-</div>
+    setResponse(JSON.stringify(res.data,null,2))
 
-)
+  }
 
+  return(
+
+    <div style={{padding:40}}>
+
+      <h1>OIX AI Studio</h1>
+
+      <input
+        value={prompt}
+        onChange={(e)=>setPrompt(e.target.value)}
+        placeholder="Ask the agent..."
+        style={{width:400}}
+      />
+
+      <button onClick={runAgent}>
+        Run Agent
+      </button>
+
+      <pre>{response}</pre>
+
+    </div>
+
+  )
 }
