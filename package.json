@@ -1,6 +1,7 @@
 {
   "name": "oix",
   "private": true,
+
   "workspaces": [
     "apps/*"
   ],
@@ -8,5 +9,7 @@
   "scripts": {
     "build": "npm run build -w web-platform",
     "start": "npm run start -w web-platform"
-  }
+  },
+
+  "packageManager": "npm@10.8.1"
 }
