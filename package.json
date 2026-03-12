@@ -1,4 +1,8 @@
-{
+"scripts": {
+ "type-check": "tsc --noEmit",
+ "lint": "eslint .",
+ "build:check": "npm run type-check && npm run lint"
+}
   "name": "oix-ai-os",
   "version": "1.0.0",
   "private": true,
