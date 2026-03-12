@@ -1,21 +1,12 @@
 {
   "name": "oix",
   "private": true,
-  "packageManager": "npm@10.8.1",
-
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
 
   "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build --filter=web-platform",
-    "lint": "turbo run lint"
-  },
-
-  "devDependencies": {
-    "turbo": "^2.8.0",
-    "typescript": "^5.4.0"
+    "build": "npm run build -w web-platform",
+    "start": "npm run start -w web-platform"
   }
 }
