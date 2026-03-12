@@ -3,13 +3,15 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        ".next/**",
-        "dist/**"
-      ]
+      "outputs": [".next/**", "dist/**"]
     },
     "dev": {
       "cache": false
     }
-  }
+  },
+  "globalEnv": [
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "LLAMA_API_KEY"
+  ]
 }
