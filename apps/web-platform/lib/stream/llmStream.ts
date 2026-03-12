@@ -1,15 +1,11 @@
+export async function streamLLM(
+  prompt: string,
+  onToken: (token: string) => void
+) {
+  const words = prompt.split(" ")
 
-export async function streamLLM(prompt,onToken){
-
-const words=prompt.split(" ")
-
-for(const w of words){
-
-await new Promise(r=>setTimeout(r,80))
-
-onToken(w)
-
+  for (const word of words) {
+    onToken(word)
+    await new Promise(r => setTimeout(r, 50))
+  }
 }
-
-}
-
