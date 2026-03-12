@@ -13,7 +13,11 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
-    "turbo": "^2.0.0"
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "turbo": "^2.0.0",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
