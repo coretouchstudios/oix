@@ -2,10 +2,8 @@ const express = require("express")
 const { runAgent } = require("./agentRunner")
 
 const app = express()
-
 app.use(express.json())
 
-// health check
 app.get("/health",(req,res)=>{
   res.json({
     status:"ok",
@@ -13,7 +11,6 @@ app.get("/health",(req,res)=>{
   })
 })
 
-// agent execution endpoint
 app.post("/run", async (req,res)=>{
 
   try{
@@ -24,7 +21,7 @@ app.post("/run", async (req,res)=>{
 
   }catch(err){
 
-    console.error(err)
+    console.error("RUNTIME ERROR:",err)
 
     res.status(500).json({
       error:"Agent execution failed"
@@ -37,5 +34,5 @@ app.post("/run", async (req,res)=>{
 const PORT = process.env.PORT || 3001
 
 app.listen(PORT,()=>{
-  console.log(`Agent Runtime running on port ${PORT}`)
+  console.log(`Agent Runtime running on ${PORT}`)
 })

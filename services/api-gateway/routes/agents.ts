@@ -1,8 +1,30 @@
-import { Router } from "express"
-import { runAgent } from "../controllers/agentController.js"
+const express = require("express")
+const router = express.Router()
+const axios = require("axios")
 
-const router = Router()
+const AGENT_RUNTIME = process.env.AGENT_RUNTIME_URL
 
-router.post("/run", runAgent)
+router.post("/run", async (req,res)=>{
 
-export default router
+  try{
+
+    const response = await axios.post(
+      `${AGENT_RUNTIME}/run`,
+      req.body
+    )
+
+    res.json(response.data)
+
+  }catch(err){
+
+    console.error(err.message)
+
+    res.status(500).json({
+      error:"Agent execution failed"
+    })
+
+  }
+
+})
+
+module.exports = router
