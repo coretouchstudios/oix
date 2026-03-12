@@ -1,13 +1,12 @@
-async function runAgent(input){
+async function runAgent(task) {
 
-  const task = input.task || "no task"
+  console.log("Running agent with task:", task);
 
   return {
-    success: true,
-    message: "Agent executed successfully",
-    task: task
-  }
+    status: "success",
+    result: `Agent completed task: ${task}`
+  };
 
 }
 
-module.exports = { runAgent }
+module.exports = { runAgent };
