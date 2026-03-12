@@ -1,60 +1,14 @@
-"scripts": {
- "type-check": "tsc --noEmit",
- "lint": "eslint .",
- "build:check": "npm run type-check && npm run lint"
-}
-  "name": "oix-ai-os",
-  "version": "1.0.0",
+{
+  "name": "oix",
   "private": true,
-  "packageManager": "npm@10.8.2",
-
+  "version": "1.0.0",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "services/*"
   ],
-
-  "bin": {
-    "oix": "./cli/oix.js"
-  },
-
   "scripts": {
-    "dev": "turbo run dev",
-    "start": "node backend/gateway/server.js",
-    "start:platform": "concurrently \"node backend/gateway/server.js\" \"npm run dev --workspace=oix-visual-studio\"",
-    "build": "turbo run build",
-    "lint": "turbo run lint"
-  },
-
-  "devDependencies": {
-    "concurrently": "^9.2.1",
-    "turbo": "latest"
-  },
-
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
-    "@qdrant/js-client-rest": "^1.17.0",
-    "axios": "^1.13.6",
-    "bcryptjs": "^3.0.3",
-    "bullmq": "^5.70.4",
-    "chalk": "^5.6.2",
-    "commander": "^14.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "eventemitter3": "^5.0.4",
-    "express": "^4.19.2",
-    "express-rate-limit": "^8.3.1",
-    "ioredis": "^5.10.0",
-    "jsonwebtoken": "^9.0.3",
-    "kafkajs": "^2.2.4",
-    "multer": "^2.1.1",
-    "next-pwa": "^5.6.0",
-    "node-fetch": "^3.3.2",
-    "open": "^11.0.0",
-    "openai": "^6.27.0",
-    "redis": "^5.11.0",
-    "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3",
-    "uuid": "^13.0.0",
-    "ws": "^8.19.0"
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspaces",
+    "type-check": "tsc --noEmit"
   }
 }
