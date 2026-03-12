@@ -1,33 +1,25 @@
 {
-  "name": "oix",
-  "private": true,
-  "packageManager": "npm@10.5.0",
-  "workspaces": [
-    "apps/*",
-    "services/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "lint": "turbo run lint"
+  "dependencies": {
+    "@react-three/drei": "^9.111.0",
+    "@react-three/fiber": "^8.17.0",
+    "next": "^16.1.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-force-graph-2d": "^1.25.2",
+    "reactflow": "^11.11.4",
+    "recharts": "^2.12.0",
+    "socket.io-client": "^4.7.5",
+    "three": "^0.161.0",
+    "three-mesh-bvh": "^0.8.0"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "turbo": "^2.0.0",
-    "typescript": "^5.9.3"
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.0"
   },
-  "dependencies": {
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.5.0",
-    "@xyflow/react": "^12.10.1",
-    "next": "^16.1.6",
-    "react-force-graph-2d": "^1.29.1",
-    "reactflow": "^11.11.4",
-    "recharts": "^3.8.0",
-    "socket.io-client": "^4.8.3",
-    "three": "^0.183.2"
+  "overrides": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0"
   }
 }
