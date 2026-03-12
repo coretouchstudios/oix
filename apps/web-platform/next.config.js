@@ -3,3 +3,10 @@ const nextConfig = {
 }
 
 export default nextConfig
+experimental: {
+  optimizePackageImports: [
+    "@react-three/fiber",
+    "@react-three/drei",
+    "reactflow"
+  ]
+}
