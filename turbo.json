@@ -1,13 +1,5 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-
-  "globalDependencies": [
-    "package.json",
-    "tsconfig.json"
-  ],
-
   "tasks": {
-
     "build": {
       "dependsOn": ["^build"],
       "outputs": [
@@ -15,14 +7,7 @@
         "dist/**"
       ]
     },
-
     "dev": {
-      "cache": false
-    },
-
-    "lint": {},
-
-    "clean": {
       "cache": false
     }
   }
