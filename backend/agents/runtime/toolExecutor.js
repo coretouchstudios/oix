@@ -1,16 +1,10 @@
+export async function executeTool(tool, input) {
 
-async function execute(step){
+  console.log("Executing tool:", tool);
 
-if(step.step==="analyze")
-return "analysis complete"
-
-if(step.step==="research")
-return "research complete"
-
-if(step.step==="generate")
-return "generation complete"
+  return {
+    tool,
+    result: "tool executed"
+  };
 
 }
-
-module.exports={execute}
-

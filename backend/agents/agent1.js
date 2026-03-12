@@ -1,9 +1,10 @@
+export default async function agent1(input) {
 
+  console.log("Agent1 executing:", input);
 
-module.exports=function agent1(input){
-
-return 'agent 1 executed '+JSON.stringify(input)
-
+  return {
+    agent: "agent1",
+    input,
+    output: "Agent1 processed task successfully"
+  };
 }
-
-

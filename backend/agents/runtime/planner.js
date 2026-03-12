@@ -1,13 +1,9 @@
+export function planTask(input) {
 
-function plan(task){
-
-return [
-{step:"analyze",input:task},
-{step:"research",input:task},
-{step:"generate",input:task}
-]
+  return {
+    steps: [
+      { agent: "agent1", task: input }
+    ]
+  };
 
 }
-
-module.exports={plan}
-

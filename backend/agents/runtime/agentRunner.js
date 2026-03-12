@@ -1,28 +1,22 @@
-const {learn}=require("../../evolution/learning/reinforcement")
-const {plan}=require("./planner")
-const {execute}=require("./toolExecutor")
+import agent1 from "./agent1.js";
+import agent2 from "./agent2.js";
+import agent3 from "./agent3.js";
+import agent4 from "./agent4.js";
 
-async function runAgent(task){
+export async function runAgent(agentName, input) {
 
-const steps=plan(task)
+  const agents = {
+    agent1,
+    agent2,
+    agent3,
+    agent4
+  };
 
-let results=[]
+  const agent = agents[agentName];
 
-for(const step of steps){
+  if (!agent) {
+    throw new Error("Agent not found");
+  }
 
-const result=await execute(step)
-
-results.push(result)
-
+  return await agent(input);
 }
-
-return {
-task,
-results
-}
-
-}
-
-module.exports={runAgent}
-
-await learn(task,results)
