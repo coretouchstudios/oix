@@ -1,6 +1,6 @@
-import { Router } from "express"
+const express = require("express")
 
-const router = Router()
+const router = express.Router()
 
 router.get("/", (req, res) => {
   res.json({
@@ -9,4 +9,4 @@ router.get("/", (req, res) => {
   })
 })
 
-export default router
+module.exports = router

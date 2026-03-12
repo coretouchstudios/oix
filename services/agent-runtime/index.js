@@ -1,28 +1,41 @@
-import express from "express";
+const express = require("express")
+const { runAgent } = require("./agentRunner")
 
-const app = express();
-app.use(express.json());
+const app = express()
 
-app.get("/health", (req, res) => {
+app.use(express.json())
+
+// health check
+app.get("/health",(req,res)=>{
   res.json({
-    status: "agent-runtime-ok"
-  });
-});
+    status:"ok",
+    service:"agent-runtime"
+  })
+})
 
-app.post("/run", async (req, res) => {
+// agent execution endpoint
+app.post("/run", async (req,res)=>{
 
-  console.log("Agent task received:", req.body);
+  try{
 
-  res.json({
-    success: true,
-    message: "Agent executed",
-    input: req.body
-  });
+    const result = await runAgent(req.body)
 
-});
+    res.json(result)
 
-const PORT = process.env.PORT || 3001;
+  }catch(err){
 
-app.listen(PORT, () => {
-  console.log(`Agent Runtime running on ${PORT}`);
-});
+    console.error(err)
+
+    res.status(500).json({
+      error:"Agent execution failed"
+    })
+
+  }
+
+})
+
+const PORT = process.env.PORT || 3001
+
+app.listen(PORT,()=>{
+  console.log(`Agent Runtime running on port ${PORT}`)
+})
