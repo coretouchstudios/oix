@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-export default function AppLayout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
@@ -57,14 +57,12 @@ export default function AppLayout({
         <header className="h-14 border-b border-white/10 flex items-center justify-between px-6">
           <div className="text-sm text-white/60">{path}</div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleLogout}
-              className="text-sm text-red-400 hover:text-red-300"
-            >
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-red-400 hover:text-red-300"
+          >
+            Logout
+          </button>
         </header>
 
         {/* PAGE CONTENT */}
