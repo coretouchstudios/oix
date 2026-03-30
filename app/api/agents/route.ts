@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   if (!currentSessionId) {
     const session = await prisma.session.create({
-      data: { title: message.slice(0, 50) },
+      data: {},
     });
     currentSessionId = session.id;
   }

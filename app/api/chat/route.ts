@@ -169,7 +169,7 @@ export async function POST(req: Request) {
 
       if (!currentSessionId) {
         const s = await prisma.session.create({
-          data: { title: message.slice(0, 50) },
+          data: {},
         });
         currentSessionId = s.id;
       }
