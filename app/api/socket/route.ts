@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
 
-let io: Server | null = null;
+let io: any;
 
-export const runtime = "nodejs";
+export const runtime = "nodejs"; // important
 
 export async function GET() {
   if (!io) {
@@ -13,7 +13,7 @@ export async function GET() {
     io.on("connection", (socket) => {
       console.log("⚡ client connected");
 
-      socket.on("join", (projectId: string) => {
+      socket.on("join", (projectId) => {
         socket.join(projectId);
       });
     });
