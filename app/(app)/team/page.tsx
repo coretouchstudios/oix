@@ -1,4 +1,7 @@
 export default function TeamPage() {
-  return <div>Team Page</div>;
+  return (
+    <div className="text-white">
+      Team Page
+    </div>
+  );
 }
-// fix
