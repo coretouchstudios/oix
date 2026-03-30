@@ -1,10 +1,7 @@
-"use client";
-
-export default function TeamPage(): JSX.Element {
+export default function TeamPage() {
   return (
-    <div style={{ padding: 20 }}>
+    <div>
       <h1>Team Page</h1>
-      <p>Team dashboard working.</p>
     </div>
   );
 }
