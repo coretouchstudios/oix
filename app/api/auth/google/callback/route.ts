@@ -58,3 +58,4 @@ export async function GET(req: Request) {
 
   return res;
 }
+export const runtime = "nodejs";

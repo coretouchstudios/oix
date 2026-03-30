@@ -50,3 +50,4 @@ export async function POST(req: Request) {
     return Response.json({ error: "Google auth failed" }, { status: 500 });
   }
 }
+export const runtime = "nodejs";
