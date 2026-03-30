@@ -3,7 +3,7 @@ export default function TeamPage() {
     <div>
       <h1 className="text-2xl font-semibold">Team</h1>
       <p className="text-white/60 mt-2">
-        Team page is working.
+        Team management coming soon.
       </p>
     </div>
   );
