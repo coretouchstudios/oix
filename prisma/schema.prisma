@@ -1,14 +1,111 @@
-datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model User {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String
+  id            String       @id @default(cuid())
+  email         String       @unique
+  createdAt     DateTime     @default(now())
+  password      String?
+  verified      Boolean      @default(false)
+  verifyExpires DateTime?
+  verifyToken   String?
+  magicTokens   MagicToken[]
+  memberships   Membership[]
+  memories      Memory[]
+  projects      Project[]
+  sessions      Session[]
+}
+
+model Project {
+  id          String       @id @default(cuid())
+  name        String
+  userId      String
+  createdAt   DateTime     @default(now())
+  repo        String?
+  deployments Deployment[]
+  files       File[]
+  members     Membership[]
+  user        User         @relation(fields: [userId], references: [id])
+}
+
+model File {
+  id        String  @id @default(cuid())
+  name      String
+  content   String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+}
+
+model Deployment {
+  id          String   @id @default(cuid())
+  projectId   String
+  status      String
+  url         String?
+  containerId String?
+  logs        String?
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  role      String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, projectId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  ip           String?
+  refreshToken String
+  userAgent    String?
+  memories     Memory[]
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Memory {
+  id               String                @id @default(cuid())
+  input            String
+  output           String
+  embedding        String
+  embedding_vector Unsupported("vector")
+  importance       Float                 @default(0.5)
+  type             String
+  createdAt        DateTime              @default(now())
+  userId           String
+  sessionId        String
+  session          Session               @relation(fields: [sessionId], references: [id])
+  user             User                  @relation(fields: [userId], references: [id])
+
+  @@index([sessionId])
+  @@index([userId])
+}
+
+model MagicToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String
+  expires   DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }

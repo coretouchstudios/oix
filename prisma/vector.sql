@@ -1,0 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
+ALTER TABLE "Memory"
+ADD COLUMN IF NOT EXISTS embedding_vector vector(1536);
