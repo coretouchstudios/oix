@@ -1,9 +1,9 @@
-import { stopSandbox } from "@/lib/docker";
+import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  const { containerName } = await req.json();
+let proc: any;
 
-  await stopSandbox(containerName);
+export async function POST() {
+  if (proc) proc.kill();
 
-  return Response.json({ ok: true });
+  return NextResponse.json({ stopped: true });
 }

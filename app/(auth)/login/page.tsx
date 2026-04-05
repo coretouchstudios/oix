@@ -1,62 +1,107 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function login() {
-    setLoading(true);
-
-    await fetch("/api/auth/magic/request", {
-      method: "POST",
-      body: JSON.stringify({ email }),
+  /* ---------------- AUTO REDIRECT IF LOGGED IN ---------------- */
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        router.replace("/mission");
+      }
     });
 
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session) {
+          router.replace("/mission");
+        }
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  /* ---------------- EMAIL LOGIN ---------------- */
+  async function login() {
+    if (!email) return;
+
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${location.origin}/mission`,
+      },
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Check your email ✉️");
+    }
+
     setLoading(false);
-    alert("Check your email for login link");
+  }
+
+  /* ---------------- GOOGLE LOGIN ---------------- */
+  async function loginWithGoogle() {
+    setLoading(true);
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${location.origin}/mission`,
+      },
+    });
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex h-screen items-center justify-center bg-black text-white">
+      <div className="p-6 border border-white/10 rounded-xl w-80 space-y-4 bg-white/5 backdrop-blur">
 
-      {/* EMAIL INPUT */}
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-3 bg-black border border-white/10 rounded-lg"
-      />
+        <h1 className="text-xl font-bold text-center">Login to OIX</h1>
 
-      {/* MAGIC LINK LOGIN */}
-      <button
-        onClick={login}
-        disabled={loading}
-        className="w-full p-3 bg-purple-600 rounded-lg hover:bg-purple-500 transition"
-      >
-        {loading ? "Sending..." : "Continue with Email"}
-      </button>
+        {/* EMAIL INPUT */}
+        <input
+          type="email"
+          placeholder="Enter your email"
+          className="w-full border border-white/10 p-2 rounded bg-black/40 outline-none"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      {/* DIVIDER */}
-      <div className="text-center text-white/30 text-sm">
-        OR
+        {/* EMAIL LOGIN */}
+        <button
+          onClick={login}
+          disabled={loading}
+          className="w-full bg-white text-black p-2 rounded font-medium"
+        >
+          {loading ? "Sending link..." : "Login with Email"}
+        </button>
+
+        {/* DIVIDER */}
+        <div className="text-center text-xs text-gray-400">OR</div>
+
+        {/* GOOGLE LOGIN */}
+        <button
+          onClick={loginWithGoogle}
+          disabled={loading}
+          className="w-full border border-white/20 p-2 rounded"
+        >
+          Continue with Google
+        </button>
+
       </div>
-
-      {/* 🔥 GOOGLE LOGIN BUTTON */}
-      <button
-        onClick={() =>
-          signIn("google", {
-            callbackUrl: "/api/auth/google-success",
-          })
-        }
-        className="w-full p-3 bg-white text-black rounded-lg hover:bg-gray-200 transition"
-      >
-        Continue with Google
-      </button>
-
     </div>
   );
 }

@@ -1,16 +1,19 @@
 import OpenAI from "openai";
-import { PrismaClient } from "@prisma/client";
+import fs from "fs";
+import path from "path";
 
 export const runtime = "nodejs";
 
 import { prisma } from "@/lib/prisma";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
+const ROOT = path.join(process.cwd(), "sandbox");
+
 export async function POST(req: Request) {
-  const { message } = await req.json();
+  const { message, file } = await req.json();
 
   const encoder = new TextEncoder();
 
@@ -33,7 +36,20 @@ export async function POST(req: Request) {
         .join("\n\n");
 
       // -------------------------
-      // 🧠 PLANNER
+      // 📂 LOAD FILE (OPTIONAL)
+      // -------------------------
+      let fileContent = "";
+
+      if (file) {
+        const filePath = path.join(ROOT, file);
+
+        if (fs.existsSync(filePath)) {
+          fileContent = fs.readFileSync(filePath, "utf-8");
+        }
+      }
+
+      // -------------------------
+      // 🧠 PLANNER AGENT
       // -------------------------
       send("[PLANNER]\n");
 
@@ -43,16 +59,19 @@ export async function POST(req: Request) {
           {
             role: "system",
             content: `
-You are a planning agent.
+You are a senior AI planner.
 
-Past memory:
+Memory:
 ${memoryText}
 
-Break the task into independent parallel steps.
-Return each step clearly.
+Break the task into clear executable steps.
+Return each step on a new line.
             `,
           },
-          { role: "user", content: message },
+          {
+            role: "user",
+            content: message,
+          },
         ],
       });
 
@@ -60,15 +79,13 @@ Return each step clearly.
       send(plan + "\n");
 
       // -------------------------
-      // ⚡ PARALLEL AGENTS
+      // ⚡ EXECUTION AGENTS
       // -------------------------
-      send("\n[PARALLEL AGENTS]\n");
+      send("\n[AGENTS]\n");
 
       const steps = plan
         .split("\n")
         .filter((s) => s.trim().length > 0);
-
-      const { runTool } = await import("@/lib/tools");
 
       const runAgent = async (step: string, index: number) => {
         let output = `\n[Agent ${index + 1}] ${step}\n`;
@@ -82,71 +99,46 @@ Return each step clearly.
               content: `
 You are an execution agent.
 
-You can use tools.
+If a FILE is provided, you can modify it.
 
-Available tools:
-- search(query)
-- calculator(expression)
-
-If needed, respond EXACTLY like:
-
-[TOOL] search: latest AI news
-
-OR
-
-[TOOL] calculator: 25 * 4
-
-Otherwise, continue normally.
+If modifying code, return ONLY the updated code.
+Otherwise, respond normally.
               `,
             },
             {
               role: "user",
-              content: step,
+              content: `
+TASK:
+${step}
+
+FILE (if exists):
+${fileContent}
+              `,
             },
           ],
         });
 
-        let execution = "";
+        let text = "";
 
         for await (const chunk of response) {
-          const text = chunk.choices[0]?.delta?.content || "";
-          execution += text;
-
-          // TOOL DETECTION
-          if (execution.includes("[TOOL]")) {
-            const match = execution.match(/\[TOOL\]\s*(\w+):\s*(.*)/);
-
-            if (match) {
-              const [, toolName, input] = match;
-
-              output += `⚡ Tool: ${toolName}\n`;
-
-              const result = await runTool(toolName, input);
-              output += result + "\n";
-
-              execution = "";
-              continue;
-            }
-          }
-
-          output += text;
+          const t = chunk.choices[0]?.delta?.content || "";
+          text += t;
+          output += t;
         }
 
-        return output;
+        return { output, text };
       };
 
-      // RUN ALL AGENTS IN PARALLEL
       const results = await Promise.all(
         steps.map((step, i) => runAgent(step, i))
       );
 
-      // STREAM RESULTS
-      for (const res of results) {
-        send(res + "\n");
+      for (const r of results) {
+        send(r.output + "\n");
       }
 
       // -------------------------
-      // 🔍 FINAL SYNTHESIS
+      // 🧬 FINAL SYNTHESIS
       // -------------------------
       send("\n[FINAL]\n");
 
@@ -156,18 +148,33 @@ Otherwise, continue normally.
           {
             role: "system",
             content: `
-Combine all agent outputs into a single clean answer.
+Combine all agent outputs into one clean final answer.
+If code is involved, return the final working version.
             `,
           },
           {
             role: "user",
-            content: results.join("\n"),
+            content: results.map((r) => r.text).join("\n"),
           },
         ],
       });
 
       const finalText = final.choices[0].message.content || "";
       send(finalText);
+
+      // -------------------------
+      // 💾 SAVE FILE (AUTOCODER)
+      // -------------------------
+      if (file && finalText.trim().length > 0) {
+        const filePath = path.join(ROOT, file);
+
+        try {
+          fs.writeFileSync(filePath, finalText);
+          send("\n[SAVED TO FILE]\n");
+        } catch (e) {
+          send("\n[ERROR SAVING FILE]\n");
+        }
+      }
 
       // -------------------------
       // 💾 SAVE MEMORY

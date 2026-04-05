@@ -1,53 +1,41 @@
 export const runtime = "nodejs";
 
-/* =========================
-   🚀 DEPLOY LOG STREAM (SSE)
-========================= */
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const projectId = searchParams.get("projectId");
+import { exec } from "child_process";
+import { promisify } from "util";
 
-  if (!projectId) {
-    return new Response("Missing projectId", { status: 400 });
+const run = promisify(exec);
+
+export async function POST(req: Request) {
+  const { provider, repoUrl } = await req.json();
+
+  try {
+    if (provider === "vercel") {
+      const { stdout } = await run(`npx vercel --yes`);
+      return Response.json({ success: true, output: stdout });
+    }
+
+    if (provider === "docker") {
+      await run(`docker build -t oix-app .`);
+      const { stdout } = await run(`docker run -d -p 3001:3000 oix-app`);
+      return Response.json({ success: true, output: stdout });
+    }
+
+    if (provider === "git") {
+      await run(`git init`);
+      await run(`git add .`);
+      await run(`git commit -m "OIX auto deploy"`);
+      await run(`git branch -M main`);
+      await run(`git remote add origin ${repoUrl}`);
+      await run(`git push -u origin main`);
+
+      return Response.json({ success: true });
+    }
+
+    return Response.json({ error: "Invalid provider" }, { status: 400 });
+  } catch (err: any) {
+    return Response.json(
+      { error: err.message || "Deploy failed" },
+      { status: 500 }
+    );
   }
-
-  const stream = new ReadableStream({
-    start(controller) {
-      let count = 0;
-
-      const encoder = new TextEncoder();
-
-      const send = (msg: string) => {
-        controller.enqueue(encoder.encode(`data: ${msg}\n\n`));
-      };
-
-      // 🔥 MOCK LOGS (replace with real Docker logs later)
-      const logs = [
-        "🔧 Initializing deployment...",
-        "📦 Installing dependencies...",
-        "⚙️ Building project...",
-        "🚀 Starting container...",
-        "🌍 Assigning domain...",
-        "✅ Deployment complete!",
-      ];
-
-      const interval = setInterval(() => {
-        if (count < logs.length) {
-          send(logs[count]);
-          count++;
-        } else {
-          clearInterval(interval);
-          controller.close();
-        }
-      }, 800);
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-    },
-  });
 }

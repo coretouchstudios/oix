@@ -1,214 +1,198 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-type Project = {
-  id: string;
-  name: string;
-  repo?: string;
-  createdAt?: string;
-  deploymentUrl?: string;
-};
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const router = useRouter();
+
+  const [projects, setProjects] = useState<any[]>([]);
+  const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState("");
-  const [repo, setRepo] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  /* --------------------------
-     LOAD PROJECTS
-  -------------------------- */
-  async function loadProjects() {
-    try {
-      const res = await fetch("/api/projects");
-      const data = await res.json();
-      setProjects(data.projects || []);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
+  /* ================= LOAD PROJECTS ================= */
   useEffect(() => {
     loadProjects();
   }, []);
 
-  /* --------------------------
-     CREATE PROJECT
-  -------------------------- */
+  async function loadProjects() {
+    try {
+      const res = await fetch("/api/projects");
+      const data = await res.json();
+      setProjects(data || []);
+    } catch {
+      setProjects([]);
+    }
+  }
+
+  /* ================= CREATE PROJECT ================= */
   async function createProject() {
     if (!name) return;
 
-    setLoading(true);
+    const res = await fetch("/api/projects", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    });
 
-    try {
-      await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, repo }),
-      });
+    const project = await res.json();
 
-      setName("");
-      setRepo("");
-      loadProjects();
-    } catch (e) {
-      console.error(e);
-    }
+    setShowModal(false);
+    setName("");
 
-    setLoading(false);
-  }
-
-  /* --------------------------
-     DEPLOY PROJECT
-  -------------------------- */
-  async function deploy(project: Project) {
-    try {
-      const res = await fetch("/api/deploy", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          projectId: project.id,
-          repo: project.repo,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("🚀 Deployed!");
-        loadProjects();
-      } else {
-        alert("❌ Deploy failed");
-        console.error(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    // redirect to workspace
+    router.push(`/projects/${project.id}/workspace`);
   }
 
   return (
-    <div className="p-8 text-white max-w-6xl mx-auto">
+    <div style={{
+      padding: "30px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "20px"
+    }}>
+
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-semibold">Projects</h1>
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center"
+      }}>
+        <h1 style={{ fontSize: "26px", fontWeight: "bold" }}>
+          📁 Projects
+        </h1>
 
         <button
-          onClick={() => {
-            document.getElementById("create-modal")?.classList.remove("hidden");
+          onClick={() => setShowModal(true)}
+          style={{
+            background: "#7c3aed",
+            border: "none",
+            padding: "10px 16px",
+            borderRadius: "8px",
+            color: "white",
+            cursor: "pointer"
           }}
-          className="bg-purple-600 px-4 py-2 rounded"
         >
-          + New Project
+          ➕ New Project
         </button>
       </div>
 
       {/* PROJECT GRID */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+        gap: "20px"
+      }}>
+        {projects.length === 0 && (
+          <div style={{ color: "#777" }}>
+            No projects yet. Create one 🚀
+          </div>
+        )}
+
         {projects.map((p) => (
           <div
             key={p.id}
-            className="bg-white/5 border border-white/10 rounded-lg p-4 hover:border-white/20 transition"
+            onClick={() => router.push(`/projects/${p.id}/workspace`)}
+            style={{
+              padding: "20px",
+              borderRadius: "10px",
+              background: "#0f0f17",
+              border: "1px solid rgba(255,255,255,0.08)",
+              cursor: "pointer"
+            }}
           >
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-medium">{p.name}</h2>
-              <span className="text-xs text-white/40">
-                {p.createdAt
-                  ? new Date(p.createdAt).toLocaleDateString()
-                  : ""}
-              </span>
-            </div>
-
-            {p.repo && (
-              <div className="text-xs text-blue-400 mt-1 truncate">
-                {p.repo}
-              </div>
-            )}
-
-            {p.deploymentUrl && (
-              <a
-                href={p.deploymentUrl}
-                target="_blank"
-                className="text-green-400 text-sm mt-2 block"
-              >
-                🌍 Live
-              </a>
-            )}
-
-            {/* ACTIONS */}
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => deploy(p)}
-                className="flex-1 bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm"
-              >
-                Deploy
-              </button>
-
-              <button
-                className="flex-1 bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-sm"
-              >
-                Open
-              </button>
+            <div style={{ fontWeight: "600" }}>{p.name}</div>
+            <div style={{ fontSize: "12px", color: "#888" }}>
+              Open workspace →
             </div>
           </div>
         ))}
       </div>
 
-      {/* EMPTY STATE */}
-      {projects.length === 0 && (
-        <div className="text-center text-white/40 mt-20">
-          No projects yet — create your first one 🚀
-        </div>
-      )}
+      {/* ================= MODAL ================= */}
+      {showModal && (
+        <div style={overlayStyle}>
+          <div style={modalStyle}>
 
-      {/* =========================
-         CREATE MODAL
-      ========================= */}
-      <div
-        id="create-modal"
-        className="hidden fixed inset-0 bg-black/70 flex items-center justify-center"
-      >
-        <div className="bg-[#0a0a0c] border border-white/10 p-6 rounded-lg w-full max-w-md">
-          <h2 className="text-xl mb-4">Create Project</h2>
+            <h2 style={{ marginBottom: "16px" }}>
+              Create Project
+            </h2>
 
-          <input
-            placeholder="Project name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full mb-3 p-2 bg-black border border-white/10 rounded"
-          />
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Project name"
+              style={inputStyle}
+            />
 
-          <input
-            placeholder="GitHub repo (optional)"
-            value={repo}
-            onChange={(e) => setRepo(e.target.value)}
-            className="w-full mb-4 p-2 bg-black border border-white/10 rounded"
-          />
+            <div style={{
+              display: "flex",
+              gap: "10px",
+              marginTop: "16px"
+            }}>
+              <button onClick={createProject} style={primaryBtn}>
+                Create
+              </button>
 
-          <div className="flex gap-2">
-            <button
-              onClick={createProject}
-              className="flex-1 bg-purple-600 p-2 rounded"
-            >
-              {loading ? "Creating..." : "Create"}
-            </button>
+              <button
+                onClick={() => setShowModal(false)}
+                style={secondaryBtn}
+              >
+                Cancel
+              </button>
+            </div>
 
-            <button
-              onClick={() =>
-                document
-                  .getElementById("create-modal")
-                  ?.classList.add("hidden")
-              }
-              className="flex-1 bg-white/10 p-2 rounded"
-            >
-              Cancel
-            </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
+
+/* ================= STYLES ================= */
+
+const overlayStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.6)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1000
+};
+
+const modalStyle: React.CSSProperties = {
+  background: "#0f0f17",
+  padding: "24px",
+  borderRadius: "12px",
+  width: "320px",
+  border: "1px solid rgba(255,255,255,0.08)"
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "10px",
+  borderRadius: "6px",
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "#00000055",
+  color: "white"
+};
+
+const primaryBtn: React.CSSProperties = {
+  flex: 1,
+  padding: "10px",
+  background: "#7c3aed",
+  border: "none",
+  borderRadius: "6px",
+  color: "white",
+  cursor: "pointer"
+};
+
+const secondaryBtn: React.CSSProperties = {
+  flex: 1,
+  padding: "10px",
+  background: "transparent",
+  border: "1px solid rgba(255,255,255,0.1)",
+  borderRadius: "6px",
+  color: "white",
+  cursor: "pointer"
+};

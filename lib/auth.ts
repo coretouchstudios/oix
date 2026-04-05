@@ -1,56 +1,38 @@
-/* =========================
-   🔐 LOGIN USER
-========================= */
-export async function loginUser(email: string) {
-  const res = await fetch("/api/auth", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email }),
-  });
-
-  if (!res.ok) {
-    throw new Error("Login failed");
-  }
-
-  const data = await res.json();
-
-  // ✅ Store BOTH user + token
-  localStorage.setItem("oix_user", JSON.stringify(data.user));
-  localStorage.setItem("oix_token", data.token);
-
-  return data.user;
-}
+import { supabase } from "./supabase";
 
 /* =========================
    👤 GET USER
 ========================= */
-export function getUser() {
-  const user = localStorage.getItem("oix_user");
-  return user ? JSON.parse(user) : null;
+export async function getUser() {
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error) return null;
+  return data.user;
 }
 
 /* =========================
-   🔑 GET TOKEN
+   🔑 GET SESSION TOKEN
 ========================= */
-export function getToken() {
-  return localStorage.getItem("oix_token");
+export async function getToken() {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token || null;
 }
 
 /* =========================
    🚪 LOGOUT
 ========================= */
-export function logoutUser() {
-  localStorage.removeItem("oix_user");
-  localStorage.removeItem("oix_token");
+export async function logoutUser() {
+  await supabase.auth.signOut();
 }
 
 /* =========================
-   📡 AUTH FETCH (AUTO TOKEN)
+   📡 AUTH FETCH (SECURE)
 ========================= */
-export async function authFetch(url: string, options: RequestInit = {}) {
-  const token = getToken();
+export async function authFetch(
+  url: string,
+  options: RequestInit = {}
+) {
+  const token = await getToken();
 
   return fetch(url, {
     ...options,

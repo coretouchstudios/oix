@@ -1,33 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
-
-const SECRET = process.env.JWT_SECRET!;
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("accessToken")?.value;
+  const host = req.headers.get("host") || "";
+  const subdomain = host.split(".")[0];
 
-  // ✅ Allow public routes
   if (
-    req.nextUrl.pathname.startsWith("/login") ||
-    req.nextUrl.pathname.startsWith("/api/auth")
+    subdomain &&
+    subdomain !== "www" &&
+    subdomain !== "oixwork"
   ) {
-    return NextResponse.next();
+    const url = req.nextUrl.clone();
+    url.pathname = `/projects/${subdomain}/live`;
+    return NextResponse.rewrite(url);
   }
 
-  // ❌ No token → block
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  try {
-    jwt.verify(token, SECRET);
-    return NextResponse.next();
-  } catch {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+  return NextResponse.next();
 }
-
-export const config = {
-  matcher: ["/dashboard/:path*"], // 🔥 THIS LINE YOU ASKED ABOUT
-};

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { exec } from "child_process";
 import util from "util";
+import path from "path";
 
 const execAsync = util.promisify(exec);
 
@@ -10,30 +11,40 @@ export const runtime = "nodejs";
    ⚙️ CONFIG
 ========================= */
 const IMAGE = "node:18-alpine";
-const PREFIX = "ai-sandbox";
+const PREFIX = "oix-project";
+
+/* =========================
+   📁 PROJECT PATH
+========================= */
+function getProjectPath(projectId: string) {
+  return path.join(process.cwd(), "sandbox", "projects", projectId);
+}
 
 /* =========================
    🧠 GET / CREATE CONTAINER
 ========================= */
-async function getContainer(sessionId: string) {
-  const name = `${PREFIX}-${sessionId}`;
+async function getContainer(projectId: string) {
+  const name = `${PREFIX}-${projectId}`;
+  const projectPath = getProjectPath(projectId);
 
   const { stdout } = await execAsync(
     `docker ps -a --filter "name=${name}" --format "{{.Names}}"`
   );
 
   if (!stdout.includes(name)) {
+    // 🔥 CREATE CONTAINER WITH VOLUME MOUNT
     await execAsync(`
       docker run -dit \
       --name ${name} \
       --network none \
       --memory="512m" \
       --cpus="0.5" \
+      -v "${projectPath}:/app" \
       -w /app \
       ${IMAGE} sh
     `);
 
-    // install base tools once
+    // install tools once
     await execAsync(
       `docker exec ${name} sh -c "apk add --no-cache git bash npm"`
     );
@@ -58,100 +69,10 @@ async function run(container: string, cmd: string) {
 }
 
 /* =========================
-   📁 APPLY MULTI FILE FIX
-========================= */
-async function applyFix(container: string, fix: string) {
-  const matches = [
-    ...fix.matchAll(
-      /\[FILE\][\s\S]*?name:\s*(.*?)\ncontent:\s*```[\w]*\n([\s\S]*?)```/g
-    ),
-  ];
-
-  if (!matches.length) return false;
-
-  for (const m of matches) {
-    const filename = m[1].trim();
-    const content = m[2];
-
-    try {
-      await execAsync(
-        `docker exec ${container} sh -c "mkdir -p $(dirname ${filename})"`
-      );
-
-      await execAsync(
-        `docker exec ${container} sh -c "cat > ${filename} << 'EOF'\n${content}\nEOF"`
-      );
-    } catch {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/* =========================
-   🧠 MULTI-AGENT AI FIX
-========================= */
-async function getFix(error: string, code: string) {
-  const OpenAI = (await import("openai")).default;
-
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
-  });
-
-  async function runAgent(role: string, style: string) {
-    const res = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-You are ${role}.
-Style: ${style}
-
-Fix the error.
-
-Return ONLY FILE blocks:
-
-[FILE]
-name: path/file.ts
-content:
-\`\`\`ts
-code
-\`\`\`
-          `,
-        },
-        {
-          role: "user",
-          content: `
-ERROR:
-${error}
-
-CODE:
-${code}
-          `,
-        },
-      ],
-    });
-
-    return res.choices[0].message.content || "";
-  }
-
-  const [A, B, C] = await Promise.all([
-    runAgent("DEV_A", "fast fix"),
-    runAgent("DEV_B", "safe fix"),
-    runAgent("DEV_C", "best long-term"),
-  ]);
-
-  // simple voting (can upgrade later)
-  return A.length >= B.length && A.length >= C.length ? A : B.length >= C.length ? B : C;
-}
-
-/* =========================
-   🚀 MAIN LOOP
+   📦 MAIN
 ========================= */
 export async function POST(req: NextRequest) {
-  const { command, sessionId, codeContext } = await req.json();
+  const { projectId, command } = await req.json();
 
   const encoder = new TextEncoder();
 
@@ -161,66 +82,22 @@ export async function POST(req: NextRequest) {
         controller.enqueue(encoder.encode(t));
 
       try {
-        if (!sessionId) {
-          send("❌ Missing sessionId\n");
+        if (!projectId || !command) {
+          send("❌ Missing projectId or command\n");
           controller.close();
           return;
         }
 
-        const container = await getContainer(sessionId);
+        const container = await getContainer(projectId);
 
-        send(`🟢 Container: ${container}\n`);
+        send(`🟢 Project Container: ${container}\n`);
+        send(`$ ${command}\n\n`);
 
-        let attempts = 0;
-        const MAX = 5;
+        const output = await run(container, command);
 
-        let output = "";
+        send(output);
 
-        while (attempts < MAX) {
-          attempts++;
-
-          send(`\n⚡ RUN ${attempts}\n`);
-          send(`$ ${command}\n\n`);
-
-          output = await run(container, command);
-          send(output);
-
-          const lower = output.toLowerCase();
-
-          /* =========================
-             ✅ SUCCESS DETECTION
-          ========================= */
-          if (
-            !lower.includes("error") &&
-            !lower.includes("failed") &&
-            !lower.includes("exception")
-          ) {
-            send("\n✅ SUCCESS\n");
-            break;
-          }
-
-          /* =========================
-             🧠 AI FIX LOOP
-          ========================= */
-          send("\n🧠 AI FIXING...\n");
-
-          const fix = await getFix(output, codeContext || "");
-
-          send("\n[AI FIX]\n" + fix);
-
-          const applied = await applyFix(container, fix);
-
-          if (!applied) {
-            send("\n❌ Failed to apply fix\n");
-            break;
-          }
-
-          send("\n♻️ FIX APPLIED → RETRYING...\n");
-        }
-
-        if (attempts === MAX) {
-          send("\n⚠️ Max attempts reached\n");
-        }
+        send("\n✅ Done\n");
 
         controller.close();
       } catch (e: any) {
